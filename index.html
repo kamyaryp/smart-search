@@ -217,9 +217,7 @@ body::before{
 .block[hidden]{display:none;}
 .block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
 .bh-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#43474f;}
-.bh-title svg{width:18px;height:18px;display:block;}
-.bh-title .clock{color:#5b5f68;}
-.bh-title .flame{color:var(--flame);}
+.bh-emoji{font-size:18px;line-height:1;display:inline-flex;align-items:center;justify-content:center;}
 .clear-btn{
   width:38px;height:38px;margin:-8px;
   display:flex;align-items:center;justify-content:center;
@@ -370,7 +368,7 @@ body::before{
       <section class="block" id="recentBlock">
         <div class="block-head">
           <div class="bh-title">
-            <span aria-hidden="true"><svg class="clock" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.8"></circle><path d="M12 7.6V12l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+            <span class="bh-emoji" aria-hidden="true">⏱️</span>
             <span>جستجوهای اخیر</span>
           </div>
           <button class="clear-btn" id="clearRecent" type="button" aria-label="پاک کردن تاریخچه جستجو">
@@ -384,7 +382,7 @@ body::before{
       <section class="block" id="popularBlock">
         <div class="block-head">
           <div class="bh-title">
-            <span aria-hidden="true"><svg class="flame" viewBox="0 0 24 24" fill="none"><path d="M12 3s4.6 3.2 4.6 8.2c0 1.2-.4 2.1-1 2.8.1-1.6-1-3-1-3s-.2 2.2-1.9 3.6c-1 .8-1.7 1.7-1.7 2.9 0 .5.1 1 .4 1.4-2.2-.4-4.4-2.3-4.4-5.5C6 8 12 7 9.5 3.8c1.4.3 2.6 1.4 3.1 2.9C13.4 5 12 3 12 3Z" fill="currentColor"></path></svg></span>
+            <span class="bh-emoji" aria-hidden="true">🔥</span>
             <span>جستجوهای پرطرفدار</span>
           </div>
         </div>
@@ -656,15 +654,19 @@ function renderAids(container, list, withBadge){
   });
 }
 
+function updateDiscoveryBlocks(){
+  const isTyping = state.activeText.trim().length > 0;
+  elRecentBlock.hidden = isTyping || RECENT.length === 0;
+  elPopularBlock.hidden = isTyping || POPULAR.length === 0;
+}
+
 function renderRecent(){
-  if(RECENT.length === 0){ elRecentBlock.hidden = true; return; }
-  elRecentBlock.hidden = false;
   renderAids(elRecent, RECENT, true);
+  updateDiscoveryBlocks();
 }
 function renderPopular(){
-  if(POPULAR.length === 0){ elPopularBlock.hidden = true; return; }
-  elPopularBlock.hidden = false;
   renderAids(elPopular, POPULAR, false);
+  updateDiscoveryBlocks();
 }
 
 function updateCTA(){
@@ -703,6 +705,7 @@ function resetInput(){
   updateGhost();
   renderSuggestions();
   updateField();
+  updateDiscoveryBlocks();
 }
 
 function addItem(text){
@@ -789,6 +792,7 @@ function onInput(){
   state.activeText = elSearch.value;
   if(state.selected !== -1){ state.selected = -1; renderChips(); }
   updateField();
+  updateDiscoveryBlocks();
   refreshGhost();
 
   if(!state.activeText.trim()){
