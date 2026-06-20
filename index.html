@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:,">
 <title>جستجوی هوشمند</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -286,41 +287,6 @@ body::before{
 }
 .reopen[hidden]{display:none;}
 
-/* ============================== MODAL ============================== */
-.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;}
-.modal[hidden]{display:none;}
-.modal-bg{position:absolute;inset:0;background:rgba(28,24,30,.42);backdrop-filter:blur(2px);animation:fade .2s both;}
-.modal-card{
-  position:relative;width:100%;max-width:360px;
-  background:#fff;border-radius:24px 24px 0 0;
-  padding:20px 18px 26px;
-  box-shadow:0 -16px 40px -18px rgba(0,0,0,.4);
-  animation:sheetUp .26s cubic-bezier(.2,.7,.2,1) both;
-}
-.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
-.modal-head span{font-size:18px;font-weight:700;}
-.modal-close{
-  width:40px;height:40px;margin:-6px;border:none;background:transparent;color:#3a3f4b;
-  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
-}
-.modal-close:hover{background:#f2f2f4;}
-.modal-close svg{width:19px;height:19px;}
-.modal-sub{color:var(--muted);font-size:14px;margin-bottom:16px;}
-.modal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
-.modal-list li{
-  display:flex;align-items:center;gap:11px;
-  background:var(--field);border:1px solid #efeff2;border-radius:14px;
-  padding:13px 14px;font-size:15px;font-weight:500;
-}
-.modal-list .num{
-  flex:none;width:26px;height:26px;border-radius:50%;
-  background:var(--grad-cta);color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  font-size:12.5px;font-weight:700;
-}
-@keyframes fade{from{opacity:0;}to{opacity:1;}}
-@keyframes sheetUp{from{transform:translateY(100%);}to{transform:none;}}
-
 /* ============================== A11Y ============================== */
 .sr-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
 :focus-visible{outline:2px solid var(--accent-deep);outline-offset:2px;}
@@ -399,21 +365,6 @@ body::before{
   </div>
 
   <button class="reopen" id="reopen" type="button" hidden="">باز کردن جستجوی هوشمند</button>
-</div>
-
-<!-- results modal -->
-<div class="modal" id="modal" hidden="" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-  <div class="modal-bg" id="modalBg"></div>
-  <div class="modal-card">
-    <div class="modal-head">
-      <span id="modalTitle">نتایج جستجو</span>
-      <button class="modal-close" id="modalClose" type="button" aria-label="بستن">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
-      </button>
-    </div>
-    <div class="modal-sub" id="modalSub"></div>
-    <ol class="modal-list" id="modalList"></ol>
-  </div>
 </div>
 
 <div class="sr-live" id="live" aria-live="polite"></div>
@@ -554,8 +505,6 @@ const elSheet=$("sheet"), elField=$("field"), elChips=$("chips"), elSearch=$("se
       elPopularBlock=$("popularBlock"), elPopular=$("popular"),
       elCta=$("cta"), elCtaCount=$("ctaCount"), elCtaLabel=elCta.querySelector(".cta-label"),
       elReopen=$("reopen"), elClearRecent=$("clearRecent"),
-      elModal=$("modal"), elModalBg=$("modalBg"), elModalClose=$("modalClose"),
-      elModalSub=$("modalSub"), elModalList=$("modalList"),
       elLive=$("live");
 
 const ICON_DIAMOND='<svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5c.4 3.6 2.9 6.1 6.5 6.5-3.6.4-6.1 2.9-6.5 6.5-.4-3.6-2.9-6.1-6.5-6.5C8.6 8.6 11.1 6.1 12 2.5Z" fill="currentColor" transform="translate(0 1.5)"/></svg>';
@@ -751,24 +700,34 @@ function focusInput(){
   try{ elSearch.focus({preventScroll:true}); }catch(e){ elSearch.focus(); }
 }
 
+// restore selected phrases saved before navigating to results.html
+function restoreItems(){
+  let raw = null;
+  try{ raw = sessionStorage.getItem("smartSearchSelectedItems"); }catch(e){ return; }
+  if(!raw) return;
+  let arr;
+  try{ arr = JSON.parse(raw); }catch(e){ return; }
+  if(!Array.isArray(arr)) return;
+  const seen = new Set();
+  arr.forEach(v=>{
+    if(typeof v !== "string") return;
+    const t = v.trim();
+    if(!t) return;
+    const nt = normalize(t);
+    if(seen.has(nt)) return;       // no duplicate chips
+    seen.add(nt);
+    state.items.push(t);
+  });
+  state.selected = -1;
+}
+
 function openResults(){
   if(state.items.length === 0) return;
-  elModalSub.textContent = toFa(state.items.length) + " محصول انتخاب شده";
-  elModalList.textContent = "";
-  state.items.forEach((txt,i)=>{
-    const li = document.createElement("li");
-    const num = document.createElement("span");
-    num.className = "num"; num.textContent = toFa(i+1);
-    const name = document.createElement("span");
-    name.textContent = txt;
-    li.appendChild(num); li.appendChild(name);
-    elModalList.appendChild(li);
-  });
-  elModal.hidden = false;
-  console.log("نتایج جستجو:", state.items.slice());
-  elModalClose.focus();
+  try{
+    sessionStorage.setItem("smartSearchSelectedItems", JSON.stringify(state.items.slice()));
+  }catch(e){}
+  window.location.href = "results.html";
 }
-function closeResults(){ elModal.hidden = true; focusInput(); }
 
 function closeSheet(){
   elSheet.style.display = "none";
@@ -877,17 +836,14 @@ elCta.addEventListener("click", openResults);
 $("closeBtn").addEventListener("click", closeSheet);
 elReopen.addEventListener("click", openSheet);
 
-elModalClose.addEventListener("click", closeResults);
-elModalBg.addEventListener("click", closeResults);
-
 document.addEventListener("keydown", e=>{
   if(e.key === "Escape"){
-    if(!elModal.hidden){ closeResults(); }
-    else if(elSheet.style.display !== "none"){ closeSheet(); }
+    if(elSheet.style.display !== "none"){ closeSheet(); }
   }
 });
 
 /* ============================== INIT ============================== */
+restoreItems();
 renderChips();
 renderSuggestions();
 renderRecent();
