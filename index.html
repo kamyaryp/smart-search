@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="fa" dir="rtl">
-<head>
-<meta charset="utf-8">
+<!-- saved from url=(0041)file:///Users/kamyar/Downloads/index.html -->
+<html lang="fa" dir="rtl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <title>جستجوی هوشمند</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com/">
+<link rel="preconnect" href="https://fonts.gstatic.com/" crossorigin="">
+<link href="./index_files/css2" rel="stylesheet">
 <style>
 /* ============================== TOKENS ============================== */
 :root{
@@ -337,17 +337,17 @@ body::before{
       <!-- header -->
       <div class="head">
         <div class="head-title">
-          <span class="h-title">جستجوی هوشمند</span>
           <span class="ai-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none">
-              <circle cx="10.5" cy="10.5" r="6.2" stroke="currentColor" stroke-width="1.9"/>
-              <path d="M15.4 15.4 L20 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
-              <path class="spark" d="M18.5 3 L19.2 5.1 L21.3 5.8 L19.2 6.5 L18.5 8.6 L17.8 6.5 L15.7 5.8 L17.8 5.1 Z" fill="currentColor"/>
+              <circle cx="10.5" cy="10.5" r="6.2" stroke="currentColor" stroke-width="1.9"></circle>
+              <path d="M15.4 15.4 L20 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"></path>
+              <path class="spark" d="M18.5 3 L19.2 5.1 L21.3 5.8 L19.2 6.5 L18.5 8.6 L17.8 6.5 L15.7 5.8 L17.8 5.1 Z" fill="currentColor"></path>
             </svg>
           </span>
+          <span class="h-title">جستجوی هوشمند</span>
         </div>
         <button class="close-btn" id="closeBtn" type="button" aria-label="بستن جستجو">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
         </button>
       </div>
 
@@ -356,10 +356,7 @@ body::before{
         <div class="chips" id="chips"></div>
         <div class="input-line">
           <div class="ghost" aria-hidden="true"><span class="g-typed" id="gTyped"></span><span class="g-suffix" id="gSuffix"></span></div>
-          <input class="search" id="search" type="text" dir="rtl"
-                 inputmode="text" autocomplete="off" autocorrect="off"
-                 autocapitalize="off" spellcheck="false" enterkeyhint="done"
-                 aria-label="نام محصول را بنویسید" aria-describedby="helper">
+          <input class="search" id="search" type="text" dir="rtl" inputmode="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-label="نام محصول را بنویسید" aria-describedby="helper" placeholder="نام محصول رو بنویس">
         </div>
         <div class="helper" id="helper">و برای افزودن بعدی، دکمه <bdi dir="ltr">Return ↵</bdi> رو بزن...</div>
       </div>
@@ -371,47 +368,47 @@ body::before{
       <section class="block" id="recentBlock">
         <div class="block-head">
           <div class="bh-title">
-            <span aria-hidden="true"><svg class="clock" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.6V12l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span aria-hidden="true"><svg class="clock" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.8"></circle><path d="M12 7.6V12l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
             <span>جستجوهای اخیر</span>
           </div>
           <button class="clear-btn" id="clearRecent" type="button" aria-label="پاک کردن تاریخچه جستجو">
-            <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7M7 7l.8 11a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7M7 7l.8 11a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"></path></svg>
           </button>
         </div>
-        <div class="aids" id="recent"></div>
+        <div class="aids" id="recent"><button type="button" class="aid" data-text="کوکاکولا پپسی زیرو" aria-label="افزودن کوکاکولا پپسی زیرو"><span>کوکاکولا پپسی زیرو</span><span class="aid-badge">۴+</span></button><button type="button" class="aid" data-text="روغن لادن" aria-label="افزودن روغن لادن"><span>روغن لادن</span><span class="aid-badge">۳+</span></button><button type="button" class="aid" data-text="کرم کاکائو فرمند" aria-label="افزودن کرم کاکائو فرمند"><span>کرم کاکائو فرمند</span></button></div>
       </section>
 
       <!-- popular -->
       <section class="block" id="popularBlock">
         <div class="block-head">
           <div class="bh-title">
-            <span aria-hidden="true"><svg class="flame" viewBox="0 0 24 24" fill="none"><path d="M12 3s4.6 3.2 4.6 8.2c0 1.2-.4 2.1-1 2.8.1-1.6-1-3-1-3s-.2 2.2-1.9 3.6c-1 .8-1.7 1.7-1.7 2.9 0 .5.1 1 .4 1.4-2.2-.4-4.4-2.3-4.4-5.5C6 8 12 7 9.5 3.8c1.4.3 2.6 1.4 3.1 2.9C13.4 5 12 3 12 3Z" fill="currentColor"/></svg></span>
+            <span aria-hidden="true"><svg class="flame" viewBox="0 0 24 24" fill="none"><path d="M12 3s4.6 3.2 4.6 8.2c0 1.2-.4 2.1-1 2.8.1-1.6-1-3-1-3s-.2 2.2-1.9 3.6c-1 .8-1.7 1.7-1.7 2.9 0 .5.1 1 .4 1.4-2.2-.4-4.4-2.3-4.4-5.5C6 8 12 7 9.5 3.8c1.4.3 2.6 1.4 3.1 2.9C13.4 5 12 3 12 3Z" fill="currentColor"></path></svg></span>
             <span>جستجوهای پرطرفدار</span>
           </div>
         </div>
-        <div class="aids" id="popular"></div>
+        <div class="aids" id="popular"><button type="button" class="aid" data-text="ماست پگاه" aria-label="افزودن ماست پگاه"><span>ماست پگاه</span></button><button type="button" class="aid" data-text="شیر کم‌چرب دامداران" aria-label="افزودن شیر کم‌چرب دامداران"><span>شیر کم‌چرب دامداران</span></button><button type="button" class="aid" data-text="چیپس ساده" aria-label="افزودن چیپس ساده"><span>چیپس ساده</span></button><button type="button" class="aid" data-text="روغن لادن" aria-label="افزودن روغن لادن"><span>روغن لادن</span></button></div>
       </section>
 
       <!-- cta -->
-      <button class="cta" id="cta" type="button" disabled>
+      <button class="cta" id="cta" type="button" disabled="" aria-label="مشاهده نتایج">
         <span class="cta-label">مشاهده نتایج</span>
-        <span class="cta-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M14.5 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
-        <span class="cta-count" id="ctaCount" hidden></span>
+        <span class="cta-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M14.5 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"></path></svg></span>
+        <span class="cta-count" id="ctaCount" hidden=""></span>
       </button>
     </div>
   </div>
 
-  <button class="reopen" id="reopen" type="button" hidden>باز کردن جستجوی هوشمند</button>
+  <button class="reopen" id="reopen" type="button" hidden="">باز کردن جستجوی هوشمند</button>
 </div>
 
 <!-- results modal -->
-<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal" id="modal" hidden="" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="modal-bg" id="modalBg"></div>
   <div class="modal-card">
     <div class="modal-head">
       <span id="modalTitle">نتایج جستجو</span>
       <button class="modal-close" id="modalClose" type="button" aria-label="بستن">
-        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path></svg>
       </button>
     </div>
     <div class="modal-sub" id="modalSub"></div>
@@ -895,5 +892,6 @@ updateField();
 focusInput();
 })();
 </script>
-</body>
-</html>
+
+
+</body></html>
