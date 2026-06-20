@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>جستجوی هوشمند</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================== TOKENS ============================== */
+:root{
+  --ink:#20242e;
+  --muted:#8b8b94;
+  --ghost:#c4c4cd;
+  --field:#f4f4f6;
+  --chip-bd:#e9e9ee;
+  --line:#ededf1;
+  --accent:#ec4899;
+  --accent-deep:#e83e8c;
+  --flame:#f5564f;
+
+  --r-card:26px;
+  --r-field:18px;
+  --r-chip:13px;
+  --r-pill:999px;
+
+  --grad-border:linear-gradient(146deg,#ffd23d 0%,#ff9a23 24%,#fb4d57 50%,#e83e8c 74%,#f56fae 100%);
+  --grad-cta:linear-gradient(95deg,#e8388e 0%,#f4455d 46%,#ff8a1e 100%);
+
+  /* grainy noise */
+  --noise:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+*{box-sizing:border-box;}
+html,body{overflow-x:hidden;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  min-height:100dvh;
+  font-family:"Vazirmatn",Tahoma,system-ui,-apple-system,"Segoe UI",sans-serif;
+  color:var(--ink);
+  background:
+    radial-gradient(120% 90% at 85% 0%, #fdeede 0%, rgba(253,238,222,0) 55%),
+    linear-gradient(168deg,#fdf0e9 0%,#fce8ec 46%,#f9e4f0 100%);
+  background-attachment:fixed;
+  display:flex;
+  justify-content:center;
+  padding:18px 14px 34px;
+}
+body::before{
+  content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:var(--noise);background-size:120px;
+  opacity:.14;mix-blend-mode:soft-light;
+}
+.stage{position:relative;z-index:1;width:100%;max-width:360px;}
+
+/* ============================== SHEET / CARD ============================== */
+.sheet{
+  position:relative;
+  padding:3px;
+  border-radius:calc(var(--r-card) + 3px);
+  background:var(--grad-border);
+  box-shadow:0 18px 46px -18px rgba(214,72,120,.45), 0 6px 18px -10px rgba(0,0,0,.18);
+  animation:rise .5s cubic-bezier(.2,.7,.2,1) both;
+}
+.sheet::before{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:var(--noise);background-size:130px;
+  opacity:.5;mix-blend-mode:soft-light;
+}
+.card{
+  position:relative;z-index:1;
+  background:#fff;
+  border-radius:var(--r-card);
+  padding:18px 16px 16px;
+}
+@keyframes rise{from{opacity:0;transform:translateY(12px) scale(.99);}to{opacity:1;transform:none;}}
+
+/* ============================== HEADER ============================== */
+.head{
+  display:flex;align-items:center;justify-content:space-between;
+  margin-bottom:14px;
+}
+.head-title{display:flex;align-items:center;gap:9px;}
+.h-title{font-weight:700;font-size:18.5px;letter-spacing:-.2px;}
+.ai-icon{display:flex;color:var(--ink);}
+.ai-icon svg{width:23px;height:23px;display:block;}
+.ai-icon .spark{color:var(--accent-deep);}
+.close-btn{
+  width:44px;height:44px;margin:-6px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;color:#3a3f4b;border-radius:50%;
+  cursor:pointer;transition:background .15s;
+}
+.close-btn:hover{background:#f2f2f4;}
+.close-btn svg{width:20px;height:20px;}
+
+/* ============================== FIELD ============================== */
+.field{
+  position:relative;
+  background:var(--field);
+  border:1px solid #efeff2;
+  border-radius:var(--r-field);
+  padding:14px 15px;
+  min-height:104px;
+  cursor:text;
+  transition:border-color .18s, box-shadow .18s;
+}
+.field.focused{border-color:#e7d3da;box-shadow:0 0 0 3px rgba(232,62,140,.07);}
+
+.chips{display:flex;flex-wrap:wrap;gap:8px;}
+.chips:not(:empty){margin-bottom:11px;}
+
+.chip{
+  display:inline-flex;align-items:center;gap:7px;
+  background:#fff;border:1px solid var(--chip-bd);
+  border-radius:var(--r-chip);
+  padding:0 8px 0 6px;min-height:40px;
+  box-shadow:0 1px 2px rgba(28,30,40,.04);
+  font-size:14px;font-weight:500;
+  animation:chipIn .22s cubic-bezier(.2,.7,.2,1) both;
+}
+.chip-text{padding-inline-start:4px;white-space:nowrap;}
+.chip-del{
+  width:30px;height:30px;flex:none;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;color:#a7a7b0;border-radius:8px;
+  cursor:pointer;transition:background .15s,color .15s;
+}
+.chip-del:hover{background:#f4f4f6;color:#ef5b6b;}
+.chip-del svg{width:16px;height:16px;}
+.chip.selected{border-color:var(--accent-deep);box-shadow:0 0 0 3px rgba(232,62,140,.14);}
+.chip.selected .chip-del{color:#ef5b6b;}
+.chip.flash{animation:flash .4s;}
+@keyframes chipIn{from{opacity:0;transform:translateY(4px) scale(.96);}to{opacity:1;transform:none;}}
+@keyframes flash{0%,100%{transform:translateX(0);}20%{transform:translateX(4px);}40%{transform:translateX(-4px);}60%{transform:translateX(3px);}80%{transform:translateX(-2px);}}
+
+/* active input line + ghost overlay */
+.input-line{position:relative;min-height:27px;}
+.ghost,.search{
+  font-family:inherit;font-size:15px;font-weight:500;line-height:1.7;
+  letter-spacing:0;direction:rtl;text-align:right;
+  padding:0;margin:0;border:0;white-space:pre;
+}
+.ghost{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  overflow:hidden;
+}
+.ghost .g-typed{color:transparent;}
+.ghost .g-suffix{color:var(--ghost);}
+.search{
+  position:relative;z-index:1;width:100%;
+  background:transparent;color:var(--ink);outline:none;
+  caret-color:var(--accent-deep);
+}
+.search::placeholder{color:#a9a9b2;opacity:1;}
+
+.helper{
+  margin-top:7px;font-size:13px;line-height:1.6;color:#a9a9b2;white-space:nowrap;
+}
+.helper bdi{
+  font-family:inherit;direction:ltr;
+  background:#ededf1;color:#7d7d87;
+  padding:1px 6px;border-radius:6px;font-weight:600;font-size:12px;
+}
+.helper[hidden]{display:none;}
+
+/* ============================== SUGGESTIONS / SKELETON ============================== */
+.suggest{padding-top:4px;}
+.suggest:empty{display:none;}
+.suggest:not(:empty){
+  margin-top:6px;padding-bottom:12px;margin-bottom:14px;
+  border-bottom:1px solid var(--line);
+}
+
+.sg-row{
+  width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  background:transparent;border:none;cursor:pointer;text-align:right;
+  padding:11px 6px;border-radius:12px;
+  transition:background .14s;
+  font-family:inherit;
+}
+.sg-row + .sg-row{border-top:1px solid var(--line);}
+.sg-row:hover{background:#faf7f9;}
+.sg-main{display:flex;align-items:center;gap:9px;min-width:0;}
+.sg-diamond{flex:none;color:var(--accent);display:flex;}
+.sg-diamond svg{width:18px;height:18px;}
+.sg-name{font-size:15px;font-weight:500;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sg-add{
+  flex:none;display:inline-flex;align-items:center;gap:5px;
+  background:#f1f1f4;color:#56565f;border:none;
+  border-radius:var(--r-pill);padding:8px 13px;min-height:36px;
+  font-family:inherit;font-size:13.5px;font-weight:600;cursor:pointer;
+  transition:background .14s,color .14s;pointer-events:none;
+}
+.sg-row:hover .sg-add{background:#fbe6f0;color:var(--accent-deep);}
+.sg-add svg{width:14px;height:14px;}
+
+.sk-row{height:15px;border-radius:8px;background:#ededf1;margin:13px 4px;}
+.sk-row:first-child{margin-top:9px;}
+.sk-shimmer{
+  background:linear-gradient(100deg,#ededf1 30%,#f6f6f8 50%,#ededf1 70%);
+  background-size:220% 100%;
+  animation:shimmer 1.2s ease-in-out infinite;
+}
+@keyframes shimmer{from{background-position:140% 0;}to{background-position:-40% 0;}}
+
+.sg-empty{padding:14px 6px 6px;color:var(--muted);font-size:14px;}
+
+/* ============================== BLOCKS (recent / popular) ============================== */
+.block{margin-top:18px;}
+.block[hidden]{display:none;}
+.block-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px;}
+.bh-title{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:600;color:#43474f;}
+.bh-title svg{width:18px;height:18px;display:block;}
+.bh-title .clock{color:#5b5f68;}
+.bh-title .flame{color:var(--flame);}
+.clear-btn{
+  width:38px;height:38px;margin:-8px;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:transparent;color:#aeaeb6;border-radius:9px;cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.clear-btn:hover{background:#f4f4f6;color:#ef5b6b;}
+.clear-btn svg{width:18px;height:18px;}
+
+.aids{display:flex;flex-wrap:wrap;gap:9px;}
+.aid{
+  display:inline-flex;align-items:center;gap:8px;flex-direction:row;
+  background:#fff;border:1px solid var(--chip-bd);
+  border-radius:var(--r-pill);
+  padding:0 15px;min-height:40px;
+  font-family:inherit;font-size:14px;font-weight:500;color:var(--ink);
+  cursor:pointer;box-shadow:0 1px 2px rgba(28,30,40,.03);
+  transition:border-color .14s,box-shadow .14s,transform .1s;
+}
+.aid:hover{border-color:#e7d3da;box-shadow:0 2px 8px rgba(232,62,140,.1);}
+.aid:active{transform:scale(.97);}
+.aid-badge{
+  direction:ltr;background:#f0f0f3;color:#9a9aa3;
+  font-size:11.5px;font-weight:700;
+  padding:2px 7px;border-radius:var(--r-pill);
+  line-height:1.4;
+}
+
+/* ============================== CTA ============================== */
+.cta{
+  position:relative;overflow:hidden;
+  width:100%;margin-top:20px;min-height:56px;
+  border:none;border-radius:22px;cursor:pointer;
+  background:var(--grad-cta);
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  color:#fff;font-family:inherit;font-size:16.5px;font-weight:700;
+  box-shadow:0 12px 26px -12px rgba(232,62,140,.6);
+  transition:transform .12s, box-shadow .18s, filter .2s, opacity .2s;
+}
+.cta::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:var(--noise);background-size:140px;
+  opacity:.5;mix-blend-mode:soft-light;
+}
+.cta:hover:not(:disabled){transform:translateY(-1px);box-shadow:0 16px 30px -12px rgba(232,62,140,.62);}
+.cta:active:not(:disabled){transform:translateY(0) scale(.995);}
+.cta:disabled{filter:grayscale(.85);opacity:.55;cursor:not-allowed;box-shadow:none;}
+.cta-label,.cta-chev,.cta-count{position:relative;z-index:1;}
+.cta-chev{display:flex;}
+.cta-chev svg{width:17px;height:17px;}
+.cta-count{
+  position:absolute;z-index:1;inset-inline-start:14px;top:50%;transform:translateY(-50%);
+  min-width:24px;height:24px;padding:0 7px;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,.24);border-radius:var(--r-pill);
+  font-size:13px;font-weight:700;
+}
+.cta-count[hidden]{display:none;}
+
+/* ============================== REOPEN ============================== */
+.reopen{
+  display:block;margin:0 auto;
+  background:#fff;border:1px solid var(--chip-bd);border-radius:var(--r-pill);
+  padding:13px 22px;font-family:inherit;font-size:15px;font-weight:600;color:var(--accent-deep);
+  cursor:pointer;box-shadow:0 8px 22px -12px rgba(232,62,140,.5);
+}
+.reopen[hidden]{display:none;}
+
+/* ============================== MODAL ============================== */
+.modal{position:fixed;inset:0;z-index:50;display:flex;align-items:flex-end;justify-content:center;}
+.modal[hidden]{display:none;}
+.modal-bg{position:absolute;inset:0;background:rgba(28,24,30,.42);backdrop-filter:blur(2px);animation:fade .2s both;}
+.modal-card{
+  position:relative;width:100%;max-width:360px;
+  background:#fff;border-radius:24px 24px 0 0;
+  padding:20px 18px 26px;
+  box-shadow:0 -16px 40px -18px rgba(0,0,0,.4);
+  animation:sheetUp .26s cubic-bezier(.2,.7,.2,1) both;
+}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.modal-head span{font-size:18px;font-weight:700;}
+.modal-close{
+  width:40px;height:40px;margin:-6px;border:none;background:transparent;color:#3a3f4b;
+  border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover{background:#f2f2f4;}
+.modal-close svg{width:19px;height:19px;}
+.modal-sub{color:var(--muted);font-size:14px;margin-bottom:16px;}
+.modal-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px;}
+.modal-list li{
+  display:flex;align-items:center;gap:11px;
+  background:var(--field);border:1px solid #efeff2;border-radius:14px;
+  padding:13px 14px;font-size:15px;font-weight:500;
+}
+.modal-list .num{
+  flex:none;width:26px;height:26px;border-radius:50%;
+  background:var(--grad-cta);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12.5px;font-weight:700;
+}
+@keyframes fade{from{opacity:0;}to{opacity:1;}}
+@keyframes sheetUp{from{transform:translateY(100%);}to{transform:none;}}
+
+/* ============================== A11Y ============================== */
+.sr-live{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+:focus-visible{outline:2px solid var(--accent-deep);outline-offset:2px;}
+.search:focus-visible{outline:none;}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important;}
+  .sk-shimmer{animation:none;}
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="sheet" id="sheet">
+    <div class="card">
+      <!-- header -->
+      <div class="head">
+        <div class="head-title">
+          <span class="h-title">جستجوی هوشمند</span>
+          <span class="ai-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <circle cx="10.5" cy="10.5" r="6.2" stroke="currentColor" stroke-width="1.9"/>
+              <path d="M15.4 15.4 L20 20" stroke="currentColor" stroke-width="1.9" stroke-linecap="round"/>
+              <path class="spark" d="M18.5 3 L19.2 5.1 L21.3 5.8 L19.2 6.5 L18.5 8.6 L17.8 6.5 L15.7 5.8 L17.8 5.1 Z" fill="currentColor"/>
+            </svg>
+          </span>
+        </div>
+        <button class="close-btn" id="closeBtn" type="button" aria-label="بستن جستجو">
+          <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+
+      <!-- field -->
+      <div class="field" id="field">
+        <div class="chips" id="chips"></div>
+        <div class="input-line">
+          <div class="ghost" aria-hidden="true"><span class="g-typed" id="gTyped"></span><span class="g-suffix" id="gSuffix"></span></div>
+          <input class="search" id="search" type="text" dir="rtl"
+                 inputmode="text" autocomplete="off" autocorrect="off"
+                 autocapitalize="off" spellcheck="false" enterkeyhint="done"
+                 aria-label="نام محصول را بنویسید" aria-describedby="helper">
+        </div>
+        <div class="helper" id="helper">و برای افزودن بعدی، دکمه <bdi dir="ltr">Return ↵</bdi> رو بزن...</div>
+      </div>
+
+      <!-- suggestions / skeleton -->
+      <div class="suggest" id="suggest" role="listbox" aria-label="پیشنهادها"></div>
+
+      <!-- recent -->
+      <section class="block" id="recentBlock">
+        <div class="block-head">
+          <div class="bh-title">
+            <span aria-hidden="true"><svg class="clock" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.4" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.6V12l3 1.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span>جستجوهای اخیر</span>
+          </div>
+          <button class="clear-btn" id="clearRecent" type="button" aria-label="پاک کردن تاریخچه جستجو">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5.5A1.5 1.5 0 0 1 11.5 4h1A1.5 1.5 0 0 1 14 5.5V7M7 7l.8 11a2 2 0 0 0 2 1.9h4.4a2 2 0 0 0 2-1.9L17 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+        <div class="aids" id="recent"></div>
+      </section>
+
+      <!-- popular -->
+      <section class="block" id="popularBlock">
+        <div class="block-head">
+          <div class="bh-title">
+            <span aria-hidden="true"><svg class="flame" viewBox="0 0 24 24" fill="none"><path d="M12 3s4.6 3.2 4.6 8.2c0 1.2-.4 2.1-1 2.8.1-1.6-1-3-1-3s-.2 2.2-1.9 3.6c-1 .8-1.7 1.7-1.7 2.9 0 .5.1 1 .4 1.4-2.2-.4-4.4-2.3-4.4-5.5C6 8 12 7 9.5 3.8c1.4.3 2.6 1.4 3.1 2.9C13.4 5 12 3 12 3Z" fill="currentColor"/></svg></span>
+            <span>جستجوهای پرطرفدار</span>
+          </div>
+        </div>
+        <div class="aids" id="popular"></div>
+      </section>
+
+      <!-- cta -->
+      <button class="cta" id="cta" type="button" disabled>
+        <span class="cta-label">مشاهده نتایج</span>
+        <span class="cta-chev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M14.5 6l-6 6 6 6" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        <span class="cta-count" id="ctaCount" hidden></span>
+      </button>
+    </div>
+  </div>
+
+  <button class="reopen" id="reopen" type="button" hidden>باز کردن جستجوی هوشمند</button>
+</div>
+
+<!-- results modal -->
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-bg" id="modalBg"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <span id="modalTitle">نتایج جستجو</span>
+      <button class="modal-close" id="modalClose" type="button" aria-label="بستن">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-sub" id="modalSub"></div>
+    <ol class="modal-list" id="modalList"></ol>
+  </div>
+</div>
+
+<div class="sr-live" id="live" aria-live="polite"></div>
+
+<script>
+"use strict";
+(function(){
+/* ============================== DATA ============================== */
+const CATALOG = [
+  {name:"چیپس ساده چی‌توز",        pop:95},
+  {name:"کوکاکولا زیرو",           pop:92},
+  {name:"چیپس سرکه‌ای مزمز",       pop:90},
+  {name:"نوشابه کوکاکولا پپسی زیرو",pop:88},
+  {name:"چیپس نمکی چی‌توز",        pop:85},
+  {name:"روغن لادن",               pop:82},
+  {name:"شیر پگاه",                pop:80},
+  {name:"شیر کم‌چرب دامداران",     pop:78},
+  {name:"ماست میهن",               pop:75},
+  {name:"شیر قهوه کاله",           pop:72},
+  {name:"چیپس فلفلی مزمز",         pop:70},
+  {name:"کرم کاکائو فرمند",        pop:68},
+  {name:"ماست میوه‌ای",            pop:60},
+  {name:"پنیر گودا ورقه‌ای",       pop:58},
+  {name:"کره بادام زمینی زمرد",    pop:55}
+];
+
+let RECENT = [
+  {text:"کوکاکولا پپسی زیرو", badge:"۴+"},
+  {text:"روغن لادن",          badge:"۳+"},
+  {text:"کرم کاکائو فرمند",   badge:null}
+];
+const POPULAR = ["ماست پگاه","شیر کم‌چرب دامداران","چیپس ساده","روغن لادن"];
+
+/* ============================== STATE ============================== */
+const state = {items:[], activeText:"", suggestions:[], ghost:"", loading:false, selected:-1};
+let loadTimer = null;
+
+/* ============================== PERSIAN UTILS ============================== */
+const FA_DIGITS = ["۰","۱","۲","۳","۴","۵","۶","۷","۸","۹"];
+function toFa(n){ return String(n).replace(/[0-9]/g, d => FA_DIGITS[+d]); }
+
+const DIA = /[\u064B-\u0652\u0670]/; // arabic diacritics (non-global for .test safety)
+const DIA_G = /[\u064B-\u0652\u0670]/g;
+// length-preserving fold: same char count out as in (needed for ghost slicing)
+function foldChar(ch){
+  if(ch==="ي") return "ی";
+  if(ch==="ك") return "ک";
+  if(ch==="ﻙ"||ch==="ﻚ") return "ک";
+  if(ch==="ة") return "ه";
+  if(ch==="\u200c"||ch==="\u200f"||ch==="\u200e"||ch==="\u00a0") return " "; // ZWNJ/RLM/LRM/nbsp -> space
+  if(DIA.test(ch)) return ""; // diacritics drop (breaks length parity -> guarded in getGhost)
+  return ch.toLowerCase();
+}
+function foldNP(s){ // near length-preserving (only diacritics removed)
+  let out="";
+  for(const ch of s) out += foldChar(ch);
+  return out;
+}
+// full normalize for matching: fold + collapse spaces + trim
+function normalize(s){
+  return foldNP(s).replace(/\s+/g," ").trim();
+}
+function tokens(s){ return normalize(s).split(" ").filter(Boolean); }
+
+// precompute normalized forms
+CATALOG.forEach(it => { it._norm = normalize(it.name); it._tokens = tokens(it.name); });
+const MAXPOP = Math.max.apply(null, CATALOG.map(it => it.pop));
+
+function lev(a,b){
+  const m=a.length, n=b.length;
+  if(!m) return n; if(!n) return m;
+  let prev=new Array(n+1), cur=new Array(n+1);
+  for(let j=0;j<=n;j++) prev[j]=j;
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      const cost = a[i-1]===b[j-1] ? 0 : 1;
+      cur[j]=Math.min(prev[j]+1, cur[j-1]+1, prev[j-1]+cost);
+    }
+    [prev,cur]=[cur,prev];
+  }
+  return prev[n];
+}
+function sim(a,b){ const m=Math.max(a.length,b.length); return m? 1-lev(a,b)/m : 1; }
+
+/* ============================== MATCHING ============================== */
+// tiers (spec order): 6 full-query prefix, 5 word-prefix, 4 exact token,
+// 3 contained substring, 2 fuzzy(>=0.62). popularity breaks ties within a tier.
+function rankSuggestions(q){
+  const nq = normalize(q);
+  if(!nq) return [];
+  const qt0 = nq.split(" ")[0];
+  const out = [];
+  for(const it of CATALOG){
+    const nn = it._norm, nt = it._tokens;
+    let tier = 0, s = 0;
+    if(nn.startsWith(nq)){
+      tier = 6;
+    } else if(nt.some(t => t.length > qt0.length && t.startsWith(qt0))){
+      tier = 5;
+    } else if(nt.indexOf(qt0) !== -1){
+      tier = 4;
+    } else if(nn.indexOf(nq) !== -1){
+      tier = 3;
+    } else {
+      let best = 0;
+      for(const t of nt){ const v = sim(qt0, t); if(v>best) best=v; }
+      const whole = sim(nq, nn); if(whole>best) best=whole;
+      if(best >= 0.62){ tier = 2; s = best; }
+    }
+    if(tier>0) out.push({item:it, tier:tier, sim:s});
+  }
+  out.sort((a,b)=>{
+    if(b.tier!==a.tier) return b.tier-a.tier;
+    if(b.sim!==a.sim) return b.sim-a.sim;
+    return b.item.pop-a.item.pop;
+  });
+  return out;
+}
+
+// ghost: suffix of the top suggestion, only when it is a true prefix of typed text
+function getGhost(typed, name){
+  const t = typed.replace(/\s+$/,"");      // ignore trailing whitespace
+  if(t !== typed) return "";               // don't show ghost mid-space
+  if(!t) return "";
+  const ft = foldNP(t), fn = foldNP(name);
+  if(fn.length <= ft.length) return "";
+  if(!fn.startsWith(ft)) return "";
+  if(ft.length !== t.length) return "";    // diacritic length drift -> bail (safe)
+  return name.slice(t.length);
+}
+
+/* ============================== DOM REFS ============================== */
+const $ = id => document.getElementById(id);
+const elSheet=$("sheet"), elField=$("field"), elChips=$("chips"), elSearch=$("search"),
+      elGTyped=$("gTyped"), elGSuffix=$("gSuffix"), elHelper=$("helper"), elSuggest=$("suggest"),
+      elRecentBlock=$("recentBlock"), elRecent=$("recent"),
+      elPopularBlock=$("popularBlock"), elPopular=$("popular"),
+      elCta=$("cta"), elCtaCount=$("ctaCount"), elCtaLabel=elCta.querySelector(".cta-label"),
+      elReopen=$("reopen"), elClearRecent=$("clearRecent"),
+      elModal=$("modal"), elModalBg=$("modalBg"), elModalClose=$("modalClose"),
+      elModalSub=$("modalSub"), elModalList=$("modalList"),
+      elLive=$("live");
+
+const ICON_DIAMOND='<svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5c.4 3.6 2.9 6.1 6.5 6.5-3.6.4-6.1 2.9-6.5 6.5-.4-3.6-2.9-6.1-6.5-6.5C8.6 8.6 11.1 6.1 12 2.5Z" fill="currentColor" transform="translate(0 1.5)"/></svg>';
+const ICON_PLUS='<svg viewBox="0 0 24 24" fill="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const ICON_TRASH='<svg viewBox="0 0 24 24" fill="none"><path d="M5 7h14M10 7V5.6A1.6 1.6 0 0 1 11.6 4h.8A1.6 1.6 0 0 1 14 5.6V7M7.5 7l.7 10.5a2 2 0 0 0 2 1.9h3.6a2 2 0 0 0 2-1.9L16.5 7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+/* ============================== RENDER ============================== */
+function renderChips(){
+  elChips.textContent = "";
+  state.items.forEach((txt,i)=>{
+    const chip = document.createElement("span");
+    chip.className = "chip" + (i===state.selected ? " selected" : "");
+    const label = document.createElement("span");
+    label.className = "chip-text";
+    label.textContent = txt;
+    const del = document.createElement("button");
+    del.type = "button";
+    del.className = "chip-del";
+    del.dataset.idx = String(i);
+    del.setAttribute("aria-label","حذف "+txt);
+    del.innerHTML = ICON_TRASH;
+    chip.appendChild(label);
+    chip.appendChild(del);
+    elChips.appendChild(chip);
+  });
+}
+
+function renderSuggestions(){
+  elSuggest.textContent = "";
+  if(state.loading){
+    [92,96,64].forEach(w=>{
+      const r = document.createElement("div");
+      r.className = "sk-row sk-shimmer";
+      r.style.width = w + "%";
+      elSuggest.appendChild(r);
+    });
+    return;
+  }
+  if(!state.activeText.trim()) return;            // empty -> nothing
+  if(state.suggestions.length === 0){
+    const e = document.createElement("div");
+    e.className = "sg-empty";
+    e.textContent = "نتیجه‌ای پیدا نشد";
+    elSuggest.appendChild(e);
+    return;
+  }
+  state.suggestions.forEach(it=>{
+    const row = document.createElement("button");
+    row.type = "button";
+    row.className = "sg-row";
+    row.dataset.name = it.name;
+    row.setAttribute("role","option");
+
+    const main = document.createElement("span");
+    main.className = "sg-main";
+    const dia = document.createElement("span");
+    dia.className = "sg-diamond"; dia.setAttribute("aria-hidden","true");
+    dia.innerHTML = ICON_DIAMOND;
+    const name = document.createElement("span");
+    name.className = "sg-name"; name.textContent = it.name;
+    main.appendChild(dia); main.appendChild(name);
+
+    const add = document.createElement("span");
+    add.className = "sg-add"; add.setAttribute("aria-hidden","true");
+    const aTxt = document.createElement("span"); aTxt.textContent = "افزودن";
+    const aIco = document.createElement("span"); aIco.style.display="flex"; aIco.innerHTML = ICON_PLUS;
+    add.appendChild(aTxt); add.appendChild(aIco);
+
+    row.setAttribute("aria-label","افزودن "+it.name);
+    row.appendChild(main);
+    row.appendChild(add);
+    elSuggest.appendChild(row);
+  });
+}
+
+function renderAids(container, list, withBadge){
+  container.textContent = "";
+  list.forEach(entry=>{
+    const txt = withBadge ? entry.text : entry;
+    const badge = withBadge ? entry.badge : null;
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "aid";
+    b.dataset.text = txt;
+    b.setAttribute("aria-label","افزودن "+txt);
+    const lab = document.createElement("span");
+    lab.textContent = txt;
+    b.appendChild(lab);
+    if(badge){
+      const bd = document.createElement("span");
+      bd.className = "aid-badge";
+      bd.textContent = badge;
+      b.appendChild(bd);
+    }
+    container.appendChild(b);
+  });
+}
+
+function renderRecent(){
+  if(RECENT.length === 0){ elRecentBlock.hidden = true; return; }
+  elRecentBlock.hidden = false;
+  renderAids(elRecent, RECENT, true);
+}
+function renderPopular(){
+  if(POPULAR.length === 0){ elPopularBlock.hidden = true; return; }
+  elPopularBlock.hidden = false;
+  renderAids(elPopular, POPULAR, false);
+}
+
+function updateCTA(){
+  const n = state.items.length;
+  elCta.disabled = n === 0;
+  if(n > 0){
+    elCtaCount.hidden = false;
+    elCtaCount.textContent = toFa(n);
+    elCta.setAttribute("aria-label","مشاهده نتایج، "+toFa(n)+" مورد");
+  } else {
+    elCtaCount.hidden = true;
+    elCta.setAttribute("aria-label","مشاهده نتایج");
+  }
+}
+
+function updateGhost(){
+  elGTyped.textContent = state.ghost ? state.activeText : "";
+  elGSuffix.textContent = state.ghost || "";
+}
+
+function updateField(){
+  elSearch.placeholder = state.items.length === 0 ? "نام محصول رو بنویس" : "نام محصول...";
+  elHelper.hidden = !(state.items.length === 0 && state.activeText === "");
+}
+
+function announce(msg){ elLive.textContent = msg; }
+
+/* ============================== ACTIONS ============================== */
+function resetInput(){
+  elSearch.value = "";
+  state.activeText = "";
+  state.suggestions = [];
+  state.ghost = "";
+  state.loading = false;
+  if(loadTimer){ clearTimeout(loadTimer); loadTimer = null; }
+  updateGhost();
+  renderSuggestions();
+  updateField();
+}
+
+function addItem(text){
+  const t = text.trim();
+  if(!t) return "empty";
+  const nt = normalize(t);
+  const dupIdx = state.items.findIndex(x => normalize(x) === nt);
+  if(dupIdx !== -1){ flashChip(dupIdx); return "dup"; }
+  state.items.push(t);
+  state.selected = -1;
+  resetInput();
+  renderChips();
+  updateCTA();
+  return "added";
+}
+
+function commitActive(){
+  const res = addItem(elSearch.value);
+  if(res === "dup") resetInput();      // clear after dup feedback
+  focusInput();
+}
+
+function removeItem(i){
+  state.items.splice(i,1);
+  if(state.selected >= state.items.length) state.selected = state.items.length - 1;
+  if(state.items.length === 0) state.selected = -1;
+  renderChips();
+  updateCTA();
+  updateField();
+  focusInput();
+}
+
+function flashChip(i){
+  const chip = elChips.children[i];
+  if(!chip) return;
+  chip.classList.remove("flash");
+  void chip.offsetWidth;       // reflow to restart animation
+  chip.classList.add("flash");
+  setTimeout(()=>chip.classList.remove("flash"), 450);
+}
+
+function focusInput(){
+  try{ elSearch.focus({preventScroll:true}); }catch(e){ elSearch.focus(); }
+}
+
+function openResults(){
+  if(state.items.length === 0) return;
+  elModalSub.textContent = toFa(state.items.length) + " محصول انتخاب شده";
+  elModalList.textContent = "";
+  state.items.forEach((txt,i)=>{
+    const li = document.createElement("li");
+    const num = document.createElement("span");
+    num.className = "num"; num.textContent = toFa(i+1);
+    const name = document.createElement("span");
+    name.textContent = txt;
+    li.appendChild(num); li.appendChild(name);
+    elModalList.appendChild(li);
+  });
+  elModal.hidden = false;
+  console.log("نتایج جستجو:", state.items.slice());
+  elModalClose.focus();
+}
+function closeResults(){ elModal.hidden = true; focusInput(); }
+
+function closeSheet(){
+  elSheet.style.display = "none";
+  elReopen.hidden = false;
+  elReopen.focus();
+}
+function openSheet(){
+  elSheet.style.display = "";
+  elReopen.hidden = true;
+  focusInput();
+}
+
+/* ============================== INPUT FLOW ============================== */
+function refreshGhost(){
+  const ranked = rankSuggestions(state.activeText);
+  state.ghost = ranked.length ? getGhost(state.activeText, ranked[0].item.name) : "";
+  updateGhost();
+}
+
+function onInput(){
+  state.activeText = elSearch.value;
+  if(state.selected !== -1){ state.selected = -1; renderChips(); }
+  updateField();
+  refreshGhost();
+
+  if(!state.activeText.trim()){
+    state.loading = false;
+    state.suggestions = [];
+    if(loadTimer){ clearTimeout(loadTimer); loadTimer = null; }
+    renderSuggestions();
+    return;
+  }
+  state.loading = true;
+  renderSuggestions();
+  if(loadTimer) clearTimeout(loadTimer);
+  loadTimer = setTimeout(()=>{
+    loadTimer = null;
+    state.loading = false;
+    state.suggestions = rankSuggestions(state.activeText).slice(0,3).map(r=>r.item);
+    renderSuggestions();
+    announce(state.suggestions.length
+      ? toFa(state.suggestions.length)+" نتیجه پیدا شد"
+      : "نتیجه‌ای پیدا نشد");
+  }, 250 + Math.floor(Math.random()*250));
+}
+
+function onKeydown(e){
+  if(e.key === "Enter"){
+    e.preventDefault();
+    commitActive();
+    return;
+  }
+  if(e.key === "Backspace" && elSearch.value === "" && state.items.length){
+    if(state.selected === -1){
+      e.preventDefault();
+      state.selected = state.items.length - 1;
+      renderChips();
+    } else {
+      e.preventDefault();
+      const i = state.selected;
+      state.selected = -1;
+      removeItem(i);
+    }
+  }
+}
+
+/* ============================== EVENTS ============================== */
+elSearch.addEventListener("input", onInput);
+elSearch.addEventListener("keydown", onKeydown);
+elSearch.addEventListener("focus", ()=> elField.classList.add("focused"));
+elSearch.addEventListener("blur", ()=> elField.classList.remove("focused"));
+
+elField.addEventListener("mousedown", e=>{ if(e.target.closest("button")) e.preventDefault(); });
+elField.addEventListener("click", e=>{
+  const del = e.target.closest(".chip-del");
+  if(del){ removeItem(+del.dataset.idx); return; }
+  if(e.target.closest("button")) return;
+  focusInput();
+});
+
+// keep focus while tapping suggestions / aids
+[elSuggest, elRecent, elPopular].forEach(c=>{
+  c.addEventListener("mousedown", e=>{ if(e.target.closest("button")) e.preventDefault(); });
+});
+elSuggest.addEventListener("click", e=>{
+  const row = e.target.closest(".sg-row");
+  if(row){ addItem(row.dataset.name); focusInput(); }
+});
+function aidClick(e){
+  const b = e.target.closest(".aid");
+  if(b){ addItem(b.dataset.text); focusInput(); }
+}
+elRecent.addEventListener("click", aidClick);
+elPopular.addEventListener("click", aidClick);
+
+elClearRecent.addEventListener("mousedown", e=>e.preventDefault());
+elClearRecent.addEventListener("click", ()=>{
+  RECENT = [];
+  renderRecent();
+  announce("تاریخچه جستجو پاک شد");
+  focusInput();
+});
+
+elCta.addEventListener("click", openResults);
+$("closeBtn").addEventListener("click", closeSheet);
+elReopen.addEventListener("click", openSheet);
+
+elModalClose.addEventListener("click", closeResults);
+elModalBg.addEventListener("click", closeResults);
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape"){
+    if(!elModal.hidden){ closeResults(); }
+    else if(elSheet.style.display !== "none"){ closeSheet(); }
+  }
+});
+
+/* ============================== INIT ============================== */
+renderChips();
+renderSuggestions();
+renderRecent();
+renderPopular();
+updateCTA();
+updateGhost();
+updateField();
+focusInput();
+})();
+</script>
+</body>
+</html>
