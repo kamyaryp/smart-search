@@ -247,6 +247,57 @@ body::before{
   line-height:1.4;
 }
 
+/* suggestion layout: carousel variant (toggleable) — default stays wrapped */
+[data-suggest="carousel"] .aids{
+  flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;scroll-snap-type:x proximity;padding-bottom:3px;
+}
+[data-suggest="carousel"] .aids::-webkit-scrollbar{display:none;}
+[data-suggest="carousel"] .aid{flex:0 0 auto;scroll-snap-align:start;}
+
+/* ============================== A/B SETTINGS (subtle) ============================== */
+.ab-gear{
+  position:fixed;z-index:60;
+  bottom:calc(12px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+  width:34px;height:34px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  border:none;background:rgba(255,255,255,.55);color:#bcb6bf;cursor:pointer;
+  opacity:.4;-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  box-shadow:0 2px 8px -4px rgba(0,0,0,.18);
+  transition:opacity .2s,color .2s,transform .15s;
+}
+.ab-gear:hover,.ab-gear:focus-visible{opacity:1;color:#8a7f90;transform:translateX(-50%) translateY(-1px);}
+.ab-gear svg{width:18px;height:18px;}
+.ab-backdrop{position:fixed;inset:0;z-index:65;background:rgba(20,16,22,.30);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:abFade .2s both;}
+.ab-backdrop[hidden]{display:none;}
+.ab-panel{
+  position:fixed;z-index:66;left:50%;transform:translateX(-50%);
+  bottom:calc(54px + env(safe-area-inset-bottom));width:min(92vw,344px);
+  background:#fff;border-radius:20px;padding:15px 16px 9px;
+  box-shadow:0 20px 46px -16px rgba(0,0,0,.42);
+  animation:abUp .24s cubic-bezier(.2,.7,.2,1) both;
+}
+.ab-panel[hidden]{display:none;}
+.ab-head{display:flex;align-items:center;gap:7px;margin:0 0 2px;}
+.ab-head .gi{display:flex;color:var(--accent);}
+.ab-head .gi svg{width:16px;height:16px;}
+.ab-head h2{margin:0;font-size:14.5px;font-weight:700;color:var(--ink);}
+.ab-sub{margin:0 0 8px;font-size:11.5px;color:var(--muted);line-height:1.6;}
+.ab-row{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:11px 2px;border-top:1px solid var(--line);}
+.ab-text{min-width:0;}
+.ab-text .l{font-size:13.5px;font-weight:600;color:#3a3f4b;display:block;}
+.ab-text .h{font-size:11px;color:var(--muted);margin-top:2px;line-height:1.5;display:block;}
+.ab-switch{
+  position:relative;flex:none;width:46px;height:27px;border-radius:999px;
+  background:#e3e1e6;border:none;cursor:pointer;padding:0;transition:background .2s;
+}
+.ab-switch::after{content:"";position:absolute;top:3px;inset-inline-start:3px;width:21px;height:21px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.28);transition:inset-inline-start .2s;}
+.ab-switch[aria-checked="true"]{background:var(--accent);}
+.ab-switch[aria-checked="true"]::after{inset-inline-start:22px;}
+@keyframes abFade{from{opacity:0;}to{opacity:1;}}
+@keyframes abUp{from{opacity:0;transform:translateX(-50%) translateY(10px);}to{opacity:1;transform:translateX(-50%);}}
+@media (prefers-reduced-motion:reduce){.ab-backdrop,.ab-panel{animation:none;}}
+
 /* ============================== CTA ============================== */
 .cta{
   position:relative;overflow:hidden;
@@ -369,27 +420,45 @@ body::before{
 
 <div class="sr-live" id="live" aria-live="polite"></div>
 
+<!-- A/B & usability test settings (subtle) -->
+<button class="ab-gear" id="abGear" type="button" aria-haspopup="dialog" aria-label="تنظیمات نمایش (آزمایشی)">
+  <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.1c.05-.36.08-.73.08-1.1s-.03-.74-.08-1.1l1.7-1.32-1.8-3.1-2 .8a7.4 7.4 0 0 0-1.9-1.1L15 3.9h-3.6l-.4 2.18a7.4 7.4 0 0 0-1.9 1.1l-2-.8-1.8 3.1L6 11c-.05.36-.08.73-.08 1.1s.03.74.08 1.1l-1.7 1.32 1.8 3.1 2-.8c.57.46 1.2.83 1.9 1.1l.4 2.18H15l.4-2.18c.7-.27 1.33-.64 1.9-1.1l2 .8 1.8-3.1L19.4 13.1Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+</button>
+
+<div class="ab-backdrop" id="abBackdrop" hidden></div>
+<div class="ab-panel" id="abPanel" role="dialog" aria-modal="true" aria-label="تنظیمات نمایش آزمایشی" hidden>
+  <div class="ab-head">
+    <span class="gi" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M12 15.4a3.4 3.4 0 1 0 0-6.8 3.4 3.4 0 0 0 0 6.8Z" stroke="currentColor" stroke-width="1.7"/></svg></span>
+    <h2>تنظیمات نمایش</h2>
+  </div>
+  <p class="ab-sub">برای تست‌های A/B و کاربری. این گزینه‌ها بلافاصله روی صفحه اعمال و ذخیره می‌شوند.</p>
+
+  <div class="ab-row">
+    <span class="ab-text"><span class="l">جستجوهای اخیر و پرطرفدار</span><span class="h">نمایش بخش‌های پیشنهاد زیر کادر جستجو</span></span>
+    <button class="ab-switch" data-key="discovery" type="button" role="switch" aria-checked="true" aria-label="نمایش جستجوهای اخیر و پرطرفدار"></button>
+  </div>
+  <div class="ab-row">
+    <span class="ab-text"><span class="l">پیشنهاد هنگام تایپ</span><span class="h">نمایش فهرست پیشنهادها در حین نوشتن</span></span>
+    <button class="ab-switch" data-key="typing" type="button" role="switch" aria-checked="true" aria-label="نمایش پیشنهاد هنگام تایپ"></button>
+  </div>
+  <div class="ab-row">
+    <span class="ab-text"><span class="l">چیدمان چیپسی</span><span class="h">نمایش پیشنهادها به‌صورت چیپس رپ‌شده، نه کاروسل</span></span>
+    <button class="ab-switch" data-key="wrapped" type="button" role="switch" aria-checked="true" aria-label="چیدمان چیپسی پیشنهادها"></button>
+  </div>
+</div>
+
+<!-- large Persian Q-commerce suggestion catalog (defines global `products`) -->
+<script src="persian-qcommerce-product-catalog.js"></script>
 <script>
 "use strict";
 (function(){
 /* ============================== DATA ============================== */
-const CATALOG = [
-  {name:"چیپس ساده چی‌توز",        pop:95},
-  {name:"کوکاکولا زیرو",           pop:92},
-  {name:"چیپس سرکه‌ای مزمز",       pop:90},
-  {name:"نوشابه کوکاکولا پپسی زیرو",pop:88},
-  {name:"چیپس نمکی چی‌توز",        pop:85},
-  {name:"روغن لادن",               pop:82},
-  {name:"شیر پگاه",                pop:80},
-  {name:"شیر کم‌چرب دامداران",     pop:78},
-  {name:"ماست میهن",               pop:75},
-  {name:"شیر قهوه کاله",           pop:72},
-  {name:"چیپس فلفلی مزمز",         pop:70},
-  {name:"کرم کاکائو فرمند",        pop:68},
-  {name:"ماست میوه‌ای",            pop:60},
-  {name:"پنیر گودا ورقه‌ای",       pop:58},
-  {name:"کره بادام زمینی زمرد",    pop:55}
-];
+// Suggestion source = large external catalog loaded above (global `products`).
+// Falls back to a tiny built-in list if the file is missing/misnamed.
+const SUGGEST_SOURCE = (typeof products !== "undefined" && Array.isArray(products) && products.length)
+  ? products
+  : ["چیپس","نوشابه","شیر","ماست","روغن","پنیر","قهوه","چای","آب معدنی","کره بادام زمینی"];
+const CATALOG = SUGGEST_SOURCE.map(name => ({ name: String(name) }));
 
 let RECENT = [
   {text:"کوکاکولا پپسی زیرو", badge:"۴+"},
@@ -400,6 +469,25 @@ const POPULAR = ["ماست پگاه","شیر کم‌چرب دامداران","چ
 
 /* ============================== STATE ============================== */
 const state = {items:[], activeText:"", suggestions:[], ghost:"", loading:false, selected:-1};
+
+/* ============================== A/B SETTINGS (persisted) ============================== */
+const AB_KEY = "smartSearchABSettings";
+const AB_DEFAULTS = { discovery:true, typing:true, wrapped:true }; // wrapped=true keeps the current chip layout; false = carousel
+function loadSettings(){
+  const s = Object.assign({}, AB_DEFAULTS);
+  try{
+    const raw = localStorage.getItem(AB_KEY);
+    if(raw){
+      const o = JSON.parse(raw);
+      if(o && typeof o === "object"){
+        ["discovery","typing","wrapped"].forEach(k=>{ if(typeof o[k] === "boolean") s[k] = o[k]; });
+      }
+    }
+  }catch(e){}
+  return s;
+}
+const AB = loadSettings();
+function saveSettings(){ try{ localStorage.setItem(AB_KEY, JSON.stringify(AB)); }catch(e){} }
 let loadTimer = null;
 
 /* ============================== PERSIAN UTILS ============================== */
@@ -429,9 +517,8 @@ function normalize(s){
 }
 function tokens(s){ return normalize(s).split(" ").filter(Boolean); }
 
-// precompute normalized forms
-CATALOG.forEach(it => { it._norm = normalize(it.name); it._tokens = tokens(it.name); });
-const MAXPOP = Math.max.apply(null, CATALOG.map(it => it.pop));
+// precompute normalized forms (+ original index for stable fallback ordering)
+CATALOG.forEach((it,i) => { it._norm = normalize(it.name); it._tokens = tokens(it.name); it._i = i; });
 
 function lev(a,b){
   const m=a.length, n=b.length;
@@ -458,29 +545,31 @@ function rankSuggestions(q){
   if(!nq) return [];
   const qt0 = nq.split(" ")[0];
   const out = [];
+  // pass 1 — cheap tiers: exact prefix / word-prefix / exact token / partial contained
   for(const it of CATALOG){
     const nn = it._norm, nt = it._tokens;
-    let tier = 0, s = 0;
-    if(nn.startsWith(nq)){
-      tier = 6;
-    } else if(nt.some(t => t.length > qt0.length && t.startsWith(qt0))){
-      tier = 5;
-    } else if(nt.indexOf(qt0) !== -1){
-      tier = 4;
-    } else if(nn.indexOf(nq) !== -1){
-      tier = 3;
-    } else {
-      let best = 0;
-      for(const t of nt){ const v = sim(qt0, t); if(v>best) best=v; }
-      const whole = sim(nq, nn); if(whole>best) best=whole;
-      if(best >= 0.62){ tier = 2; s = best; }
+    let tier = 0;
+    if(nn.startsWith(nq)) tier = 6;                                            // 1) exact prefix
+    else if(nt.some(t => t.length > qt0.length && t.startsWith(qt0))) tier = 5; // 2) word-prefix
+    else if(nt.indexOf(qt0) !== -1) tier = 4;                                  // 3) exact token
+    else if(nn.indexOf(nq) !== -1) tier = 3;                                   // 4) partial contained
+    if(tier > 0) out.push({item:it, tier:tier, sim:0});
+  }
+  // pass 2 — 5) lightweight fuzzy, only when strong matches are scarce (keeps mobile fast)
+  if(out.length < 3 && nq.length >= 2){
+    const seen = new Set(out.map(o => o.item));
+    for(const it of CATALOG){
+      if(seen.has(it)) continue;
+      const nn = it._norm, nt = it._tokens;
+      let best = sim(nq, nn);
+      for(const t of nt){ const v = sim(qt0, t); if(v > best){ best = v; if(best >= 0.92) break; } }
+      if(best >= 0.62) out.push({item:it, tier:2, sim:best});
     }
-    if(tier>0) out.push({item:it, tier:tier, sim:s});
   }
   out.sort((a,b)=>{
-    if(b.tier!==a.tier) return b.tier-a.tier;
-    if(b.sim!==a.sim) return b.sim-a.sim;
-    return b.item.pop-a.item.pop;
+    if(b.tier !== a.tier) return b.tier - a.tier;   // tier priority
+    if(b.sim  !== a.sim ) return b.sim  - a.sim;    // fuzzy closeness
+    return a.item._i - b.item._i;                   // 6) original order fallback
   });
   return out;
 }
@@ -534,6 +623,7 @@ function renderChips(){
 
 function renderSuggestions(){
   elSuggest.textContent = "";
+  if(!AB.typing) return;                          // "is-typing suggestions" disabled
   if(state.loading){
     [92,96,64].forEach(w=>{
       const r = document.createElement("div");
@@ -605,8 +695,9 @@ function renderAids(container, list, withBadge){
 
 function updateDiscoveryBlocks(){
   const isTyping = state.activeText.trim().length > 0;
-  elRecentBlock.hidden = isTyping || RECENT.length === 0;
-  elPopularBlock.hidden = isTyping || POPULAR.length === 0;
+  const show = AB.discovery;
+  elRecentBlock.hidden = !show || isTyping || RECENT.length === 0;
+  elPopularBlock.hidden = !show || isTyping || POPULAR.length === 0;
 }
 
 function renderRecent(){
@@ -632,6 +723,7 @@ function updateCTA(){
 }
 
 function updateGhost(){
+  if(!AB.typing){ elGTyped.textContent = ""; elGSuffix.textContent = ""; return; }
   elGTyped.textContent = state.ghost ? state.activeText : "";
   elGSuffix.textContent = state.ghost || "";
 }
@@ -836,14 +928,52 @@ elCta.addEventListener("click", openResults);
 $("closeBtn").addEventListener("click", closeSheet);
 elReopen.addEventListener("click", openSheet);
 
+/* ============================== A/B SETTINGS UI ============================== */
+const elAbGear=$("abGear"), elAbPanel=$("abPanel"), elAbBackdrop=$("abBackdrop");
+let abLastFocus = null;
+function applyLayout(){
+  document.documentElement.setAttribute("data-suggest", AB.wrapped ? "wrapped" : "carousel");
+}
+function syncSwitches(){
+  document.querySelectorAll(".ab-switch[data-key]").forEach(sw=>{
+    sw.setAttribute("aria-checked", AB[sw.dataset.key] ? "true" : "false");
+  });
+}
+function openAbPanel(){
+  abLastFocus = document.activeElement;
+  elAbBackdrop.hidden = false; elAbPanel.hidden = false;
+  const f = elAbPanel.querySelector(".ab-switch");
+  if(f) f.focus();
+}
+function closeAbPanel(){
+  elAbPanel.hidden = true; elAbBackdrop.hidden = true;
+  if(abLastFocus && abLastFocus.focus){ abLastFocus.focus(); } else { elAbGear.focus(); }
+}
+elAbGear.addEventListener("click", ()=>{ elAbPanel.hidden ? openAbPanel() : closeAbPanel(); });
+elAbBackdrop.addEventListener("click", closeAbPanel);
+elAbPanel.addEventListener("click", e=>{
+  const sw = e.target.closest(".ab-switch[data-key]");
+  if(!sw) return;
+  const key = sw.dataset.key;
+  AB[key] = !AB[key];
+  saveSettings();
+  sw.setAttribute("aria-checked", AB[key] ? "true" : "false");
+  if(key === "discovery"){ updateDiscoveryBlocks(); }
+  else if(key === "typing"){ renderSuggestions(); updateGhost(); }
+  else if(key === "wrapped"){ applyLayout(); }
+});
+
 document.addEventListener("keydown", e=>{
   if(e.key === "Escape"){
+    if(!elAbPanel.hidden){ closeAbPanel(); return; }
     if(elSheet.style.display !== "none"){ closeSheet(); }
   }
 });
 
 /* ============================== INIT ============================== */
 restoreItems();
+applyLayout();
+syncSwitches();
 renderChips();
 renderSuggestions();
 renderRecent();
